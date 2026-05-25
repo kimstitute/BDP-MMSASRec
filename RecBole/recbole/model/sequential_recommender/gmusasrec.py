@@ -95,7 +95,7 @@ class GMUSASRec(SequentialRecommender):
         self.image_feat_field = float_seq_fields[0]
 
         # --- P1-A: 이산화 설정 충돌 검증 ---
-        dis_info = config.get("discretization") or {}
+        dis_info = config["discretization"] or {}
         if self.image_feat_field in dis_info:
             raise ValueError(
                 f"GMUSASRec does not support discretization on "
@@ -106,14 +106,14 @@ class GMUSASRec(SequentialRecommender):
             )
 
         # --- P1-B: numerical_features 경로 감지 ---
-        numerical_features = config.get("numerical_features") or []
+        numerical_features = config["numerical_features"] or []
         use_tuple = self.image_feat_field in numerical_features
 
         self.image_feat_dim = dataset.field2seqlen[self.image_feat_field]
 
         # --- P4-A: 정규화 미적용 경고 ---
-        normalize_fields = list(config.get("normalize_field") or [])
-        normalize_all = bool(config.get("normalize_all"))
+        normalize_fields = list(config["normalize_field"] or [])
+        normalize_all = bool(config["normalize_all"])
         if self.image_feat_field not in normalize_fields and not normalize_all:
             self.logger.warning(
                 f"Image feature '{self.image_feat_field}' is not normalized. "

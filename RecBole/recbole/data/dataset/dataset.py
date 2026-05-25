@@ -709,9 +709,28 @@ class Dataset(torch.utils.data.Dataset):
                 if ftype == FeatureType.FLOAT:
                     feat[field] = norm(feat[field].values)
                 elif ftype == FeatureType.FLOAT_SEQ:
-                    split_point = np.cumsum(feat[field].agg(len))[:-1]
-                    feat[field] = np.split(
-                        norm(feat[field].agg(np.concatenate)), split_point
+                    seq_values = [
+                        np.asarray(seq, dtype=np.float64)
+                        for seq in feat[field].tolist()
+                    ]
+                    seq_lengths = np.array([len(seq) for seq in seq_values])
+                    total_seq_len = int(seq_lengths.sum())
+
+                    if total_seq_len == 0:
+                        feat[field] = pd.Series(
+                            [
+                                np.array([], dtype=np.float64)
+                                for _ in seq_values
+                            ],
+                            index=feat.index,
+                        )
+                        continue
+
+                    split_point = np.cumsum(seq_lengths)[:-1]
+                    normalized_values = norm(np.concatenate(seq_values))
+                    feat[field] = pd.Series(
+                        np.split(normalized_values, split_point),
+                        index=feat.index,
                     )
 
     def _discretization(self):
